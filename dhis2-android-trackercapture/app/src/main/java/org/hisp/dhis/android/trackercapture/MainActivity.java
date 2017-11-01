@@ -29,10 +29,17 @@
 
 package org.hisp.dhis.android.trackercapture;
 
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
+
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -45,14 +52,12 @@ import org.hisp.dhis.android.sdk.network.Session;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.models.UserAccount;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
-import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.sdk.utils.ScreenSizeConfigurator;
 import org.hisp.dhis.android.trackercapture.activities.HolderActivity;
 import org.hisp.dhis.android.trackercapture.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.InformationFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
-
-import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class MainActivity extends AbsHomeActivity {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -67,17 +72,20 @@ public class MainActivity extends AbsHomeActivity {
             "org.hisp.dhis.android.trackercapture";
     private static final String APPS_TRACKER_CAPTURE_REPORTS_PACKAGE =
             "org.hispindia.bidtrackerreports";
-    private static final String APPS_REDCAP_PACKAGE =
-            "edu.vanderbilt.redcap";
-    private static final String APPS_ECEB_PACKAGE =
-            "com.eceb";
-    private static final String APPS_ECSB_PACKAGE =
-            "com.ecsb";
-
+    private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ScreenSizeConfigurator.init(getWindowManager());
+
+        boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+        if (!hasPermissionLocation) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_ACCESS_FINE_LOCATION);
+        }
 
         if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
             // Activity was brought to front and not created,
@@ -154,8 +162,6 @@ public class MainActivity extends AbsHomeActivity {
     }
 
     public void loadInitialData() {
-        String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
-        UiUtils.postProgressMessage(message);
         DhisService.loadInitialData(MainActivity.this);
     }
 
@@ -168,8 +174,15 @@ public class MainActivity extends AbsHomeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        ScreenSizeConfigurator.init(getWindowManager());
         Dhis2Application.getEventBus().register(this);
         loadInitialData();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ScreenSizeConfigurator.init(getWindowManager());
     }
 
     @Override
@@ -203,12 +216,6 @@ public class MainActivity extends AbsHomeActivity {
         } else if (menuItemId == R.id.drawer_item_information) {
             attachFragment(getInformationFragment());
             isSelected = true;
-        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_redcap) {
-            isSelected = openApp(APPS_REDCAP_PACKAGE);
-        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_ECEB) {
-            isSelected = openApp(APPS_ECEB_PACKAGE);
-        } else if (menuItemId == org.hisp.dhis.client.sdk.ui.R.id.drawer_item_ECSB) {
-            isSelected = openApp(APPS_ECSB_PACKAGE);
         }
         /*else if (menuItemId == R.id.drawer_item_help) {
             attachFragment(getHelpFragment());

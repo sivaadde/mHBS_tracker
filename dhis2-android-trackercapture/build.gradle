@@ -7,10 +7,11 @@ buildscript {
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:2.2.3'
         classpath 'com.raizlabs:Griddle:1.0.3'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -31,16 +32,18 @@ ext {
     minSdkVersion = 15
     compileSdkVersion = 23
     targetSdkVersion = 23
-    versionCode = 54
-    versionName = "0.3.37-2.26"
+    versionCode = 57
+    versionName = "0.4.0"
 
     configuration = [
+            package          : "org.hisp.dhis.android.trackercapture",
+            applicationId    : "org.hisp.dhis.android.trackercapture",
             buildToolsVersion: "23.0.2",
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,
-            versionCode      : 54,
-            versionName      : "0.3.37-2.26"
+            versionCode      : 57,
+            versionName      : "0.4.0"
     ]
 
     libraries = [
